@@ -2,12 +2,13 @@
 
 import urllib2
 import sqlite3
+import os
 
 url_kd = "http://kdjw.hnust.cn/kdjw/uploadfile/studentphoto/pic/"
 url_xx = "http://xxjw.hnust.cn/xxjw/uploadfile/studentphoto/pic/"
 store_path = "../photo-package/"
-database = "../../hnust-parser/hnust-data.db"
-sql_query = "SELECT student_id, xiaoxiang FROM students WHERE student_id LIKE '09%'"
+database = "../hnust-data.db"
+sql_query = "SELECT student_id, xiaoxiang FROM students WHERE student_id LIKE '08%'"
 
 def download_photo(student_id, is_xiaoxiang = False):
     if is_xiaoxiang:
@@ -15,12 +16,16 @@ def download_photo(student_id, is_xiaoxiang = False):
     else:
         url = url_kd
         
+    file_path = store_path + student_id + ".jpg"
     url = url + student_id + ".JPG"
     print url
+    if os.path.exists(file_path):
+        print "exists, skip"
+        return True
     
     try:
         http_file = urllib2.urlopen(url)
-        save_file = open(store_path + student_id + ".jpg", "wb")
+        save_file = open(file_path, "wb")
         bufsize = 2048
         while True:
             data = http_file.read(bufsize)
