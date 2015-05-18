@@ -1,16 +1,16 @@
+#!python
 '''
 Created on May 15, 2015
 
 @author: luodichen
 '''
-#!python
 
 from pyquery import PyQuery
 from fileinput import filename
 import sqlite3
 
 database = "../hnust-data.db"
-pagecount = 1546
+pagecount = 466
 
 def main():
     create_table = "CREATE TABLE IF NOT EXISTS students (_id INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -28,14 +28,14 @@ def main():
                     training_level, research, tutor, credit, nation, hometown, \
                     blood_type, political, marriage, foreigner, religion, health, \
                     address, post_code, mobile, email, homepage, comment, creator, \
-                    create_time, from_xinjiang, property)"
+                    create_time, from_xinjiang, property, xiaoxiang)"
     
     conn = sqlite3.connect(database)
     sqlite_cursor = conn.cursor()
     sqlite_cursor.execute(create_table)
     
     for k in range(1, pagecount + 1):
-        file = open("../hnust-package/page" + str(k) + ".html", "r")
+        file = open("../hnust-xx-package/page-xx-" + str(k) + ".html", "r")
         pq = PyQuery(unicode(file.read(), "utf-8"))
         rows =  pq("#mxh tr")
         for i in range(0, rows.length):
@@ -49,7 +49,7 @@ def main():
                 else:
                     insert_values = insert_values + ", '" + col.html().strip() + "'"
             
-            insert_values = insert_values + ")"
+            insert_values = insert_values + ", '1')"
             sql_insert = "INSERT INTO students " + insert_keys + " VALUES " + insert_values
             sqlite_cursor.execute(sql_insert);
             print ""
