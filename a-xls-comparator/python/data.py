@@ -70,11 +70,6 @@ class Data(object):
                 row = table.row_values(i)
                 
                 if 0 == len(col_index):
-                    '''
-                    for j in range(len(row)):
-                        if row[j] in self.COLUMNS:
-                            col_index[self.COLUMNS[row[j]]] = j
-                    '''
                     col_index = Data.detect_header(row)
                     if 0 != len(col_index) and len(col_index) != len(self.COLUMNS_NAME):
                         err_msg = "file '%s' : miss columns in sheet '%s'" % (self.file, table.name)
@@ -103,7 +98,3 @@ class Data(object):
         
         return (self.ERR_NOERROR, None)
         
-obj = Data(r"D:\ljq\test2.xls")
-print obj.txt_handler()
-for row in obj.table:
-    print row[0]
