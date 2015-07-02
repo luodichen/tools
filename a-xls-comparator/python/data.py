@@ -6,11 +6,13 @@ Created on Jun 30, 2015
 '''
 
 import xlrd
+import fileinput
 
 class Data(object):
     ERR_NOERROR             =  0
     ERR_NOT_EXCEL_FILE      = -1
     ERR_MISS_COLUMNS        = -2
+    ERR_FORMAT_NOT_SUPPORTED= -3
     
     COLUMNS_NAME = [
         "name", "idcard", "phone", "school", "class", "city", "district"
@@ -33,10 +35,18 @@ class Data(object):
         u"县（市区）" : 6,
     }
     
-    @staticmethod
-    def strcell(cell):
+    @classmethod
+    def strcell(cls, cell):
         return u"%.0f" % (cell, ) if isinstance(cell, float) else cell
     
+    @classmethod
+    def detect_header(cls, row):
+        ret = {}
+        for i in range(len(row)):
+            if row[i] in cls.COLUMNS:
+                ret[cls.COLUMNS[row[i]]] = i
+        return ret
+                
     def __init__(self, filepath):
         self.file = filepath
         self.table = []
@@ -60,10 +70,12 @@ class Data(object):
                 row = table.row_values(i)
                 
                 if 0 == len(col_index):
+                    '''
                     for j in range(len(row)):
                         if row[j] in self.COLUMNS:
                             col_index[self.COLUMNS[row[j]]] = j
-                    
+                    '''
+                    col_index = Data.detect_header(row)
                     if 0 != len(col_index) and len(col_index) != len(self.COLUMNS_NAME):
                         err_msg = "file '%s' : miss columns in sheet '%s'" % (self.file, table.name)
                         return (self.ERR_MISS_COLUMNS, err_msg)
@@ -71,3 +83,27 @@ class Data(object):
                     self.table.append(tuple(self.strcell(row[col_index[idx]]) for idx in range(len(col_index))))
                 i += 1
         return (self.ERR_NOERROR, None,)
+    
+    def txt_handler(self):
+        col_index = {}
+        try:
+            for line in fileinput.input(self.file):
+                row = line.decode("gbk").split("\t")
+                
+                if 0 == len(col_index):
+                    col_index = Data.detect_header(row)
+                    if 0 != len(col_index) and len(col_index) != len(self.COLUMNS_NAME):
+                        err_msg = "file '%s' : miss columns" % (self.file, )
+                        return (self.ERR_MISS_COLUMNS, err_msg)
+                else:
+                    self.table.append(tuple(self.strcell(row[col_index[idx]]) for idx in range(len(col_index))))
+        except Exception, e:
+            print e
+            return (self.ERR_FORMAT_NOT_SUPPORTED, "file format not support : %s" % (self.file, ))
+        
+        return (self.ERR_NOERROR, None)
+        
+obj = Data(r"D:\ljq\test2.xls")
+print obj.txt_handler()
+for row in obj.table:
+    print row[0]
