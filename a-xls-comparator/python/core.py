@@ -5,9 +5,20 @@ Created on Jun 30, 2015
 @author: luodichen
 '''
 
-import xlrd
+from data import Data
 
-excel_file = xlrd.open_workbook(unicode(r"D:\ljq\555学员学情统计表.xls", "utf8"))
-table = excel_file.sheets()[0]
-for i in range(50):
-    print table.row_values(i)[1]
+class DataIndex(object):
+    def __init__(self, table):
+        self.table = table
+        self.index_column = (Data.COL_NAME, Data.COL_IDCARD, Data.COL_PHONE, )
+        self.index = ({}, {}, {}, ) # name, idcard, phone
+        self.load()
+        
+    def load(self):
+        for row in self.table:          
+            for i in range(len(self.index_column)):
+                key = row[self.index_column[i]].replace(" ", "")
+                if key not in self.index[i]:
+                    self.index[i][key] = []
+                self.index[i][key].append(row)
+
